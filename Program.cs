@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+using FluentValidation.AspNetCore;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using MyAuthWork.Constants;
 
 namespace MyAuthWork
 {
@@ -12,6 +12,7 @@ namespace MyAuthWork
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddEndpointsApiExplorer();
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -24,26 +25,29 @@ namespace MyAuthWork
             //               .AllowAnyHeader(); // Tüm HTTP baþlýklarýný kabul et
             //    });
             //});
-
-
+            builder.Services.AddScoped<TokenManager>();
+            builder.Services.AddSession();
+            builder.Services.AddFluentValidation(x =>
+            {
+                x.RegisterValidatorsFromAssemblyContaining<Program>();
+            });
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    //options.Authority = "https://localhost:7136/";
-                    
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt.Issuer"],
-                        ValidAudience = builder.Configuration["Jwt.Audience"],
+                        ValidIssuer = "semih",
+                        ValidAudience = "semih",
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
 
                     };
                 });
-       
+
+
 
             var app = builder.Build();
 
@@ -56,6 +60,19 @@ namespace MyAuthWork
             }
 
             app.UseHttpsRedirection();
+            app.UseSession();
+
+            app.Use(async (context, next) =>
+            {
+                var token = context.Session.GetString("Token");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Request.Headers.Add("Authorization", "Bearer " + token);
+                }
+                await next();
+            });
+
+
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -64,7 +81,7 @@ namespace MyAuthWork
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=MvcLogin}/{action=Login}/{id?}");
 
             app.Run();
         }

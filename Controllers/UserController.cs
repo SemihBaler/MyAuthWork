@@ -10,7 +10,7 @@ namespace MyAuthWork.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        [HttpGet("Admins")]
+        [HttpGet("[action]")]
         [Authorize]
         public IActionResult AdminsEndPoint()
         {

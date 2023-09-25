@@ -8,7 +8,7 @@
             {
                 UserName = "Semih_Admin",
                 Email = "semihbaler@gmail.com",
-                Password = "69586__semmer",
+                Password = "Aa123",
                 GivenName = "Semih",
                 Surname = "Baler",
                 Role="Administrator"
@@ -17,7 +17,7 @@
             {
                  UserName = "Merve_Seller",
                 Email = "merve@gmail.com",
-                Password = "1234",
+                Password = "Aa123",
                 GivenName = "Merve",
                 Surname = "Baler",
                 Role="Seller"
